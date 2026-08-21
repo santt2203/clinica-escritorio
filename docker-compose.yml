@@ -1,0 +1,20 @@
+# Base de datos del laboratorio.
+#   Levantar:  docker compose up -d
+#   Apagar:    docker compose down
+#   Borrar todo y empezar de cero:  docker compose down -v
+services:
+  db:
+    image: postgres:16
+    container_name: clinica-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: clinicadb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lapass
+    ports:
+      - "5432:5432"
+    volumes:
+      - clinica-datos:/var/lib/postgresql/data
+
+volumes:
+  clinica-datos:
