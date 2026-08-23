@@ -23,3 +23,17 @@ mvn compile exec:java
 
 Apagar la base: `docker compose down`.  
 Borrar los datos y empezar de cero: `docker compose down -v`.
+
+## Convención para ramas
+
+Las ramas deben seguir estas convenciones:
+
+- Nuevas funcionalidades: `feature-nombre-descriptivo`
+- Correcciones: `fix-nombre-del-error`
+
+Se deben usar minúsculas y separar las palabras con guiones. Por ejemplo:
+
+```text
+feature-gestion-usuarios
+fix-error-inicio-sesion
+```
