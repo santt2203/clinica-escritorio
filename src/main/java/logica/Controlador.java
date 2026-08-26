@@ -159,7 +159,9 @@ public class Controlador implements IControlador {
 
     @Override
     public List<DtPrestacion> listarCatalogo() {
-        throw new UnsupportedOperationException("Pendiente");
+        return ManejadorPrestacion.getInstancia().listarPrestaciones().stream()
+                .map(Prestacion::getDtPrestacion)
+                .toList();
     }
 
     @Override
