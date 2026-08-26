@@ -1,11 +1,14 @@
 package logica;
 
-import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import datatypes.DtOrden;
 import datatypes.DtPrestacion;
@@ -22,12 +25,19 @@ import interfaces.IControlador;
 
 public class Controlador implements IControlador {
 
+    private static final String ALGORITMO_PASSWORD = "PBKDF2WithHmacSHA256";
+    private static final String PREFIJO_HASH = "PBKDF2";
+    private static final int ITERACIONES = 210_000;
+    private static final int LONGITUD_SAL = 16;
+    private static final int LONGITUD_HASH = 256;
+    private static final SecureRandom GENERADOR_ALEATORIO = new SecureRandom();
+
     @Override
     public void registrarMedico(String email, String nombre, String password, String especialidad)
             throws UsuarioRepetidoException {
         verificarEmailLibre(email);
         ManejadorUsuario.getInstancia()
-                .agregarUsuario(new Medico(email, nombre, hash(password), especialidad));
+                .agregarUsuario(new Medico(email, nombre, generarHashPassword(password), especialidad));
     }
 
     @Override
@@ -35,13 +45,13 @@ public class Controlador implements IControlador {
             throws UsuarioRepetidoException {
         verificarEmailLibre(email);
         ManejadorUsuario.getInstancia()
-                .agregarUsuario(new Paciente(email, nombre, hash(password), mutualista));
+                .agregarUsuario(new Paciente(email, nombre, generarHashPassword(password), mutualista));
     }
 
     @Override
     public DtUsuario iniciarSesion(String email, String password) throws CredencialesInvalidasException {
         Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
-        if (usuario == null || !usuario.getPassword().equals(hash(password)))
+        if (usuario == null || !verificarPassword(password, usuario.getPassword()))
             throw new CredencialesInvalidasException("Email o contraseña incorrectos");
         return usuario.getDtUsuario();
     }
@@ -51,13 +61,46 @@ public class Controlador implements IControlador {
             throw new UsuarioRepetidoException("Ya existe un usuario con el email " + email);
     }
 
-    /** Nunca guardamos la contraseña tal cual: guardamos su huella SHA-256. */
-    private static String hash(String texto) {
+    /** Genera un hash PBKDF2 con una sal aleatoria que se guarda junto al hash. */
+    private static String generarHashPassword(String password) {
         try {
-            MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
-            return Base64.getEncoder().encodeToString(algoritmo.digest(texto.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            byte[] sal = new byte[LONGITUD_SAL];
+            GENERADOR_ALEATORIO.nextBytes(sal);
+            byte[] hash = derivarHash(password, sal, ITERACIONES);
+            return String.join("$", PREFIJO_HASH, Integer.toString(ITERACIONES),
+                    Base64.getEncoder().encodeToString(sal), Base64.getEncoder().encodeToString(hash));
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("No se pudo proteger la contraseña", e);
+        }
+    }
+
+    private static boolean verificarPassword(String password, String passwordGuardada) {
+        if (passwordGuardada == null)
+            return false;
+
+        try {
+            String[] partes = passwordGuardada.split("\\$", -1);
+            if (partes.length != 4)
+                return false;
+
+            int iteraciones = Integer.parseInt(partes[1]);
+            byte[] sal = Base64.getDecoder().decode(partes[2]);
+            byte[] hashEsperado = Base64.getDecoder().decode(partes[3]);
+            byte[] hashObtenido = derivarHash(password, sal, iteraciones);
+            return MessageDigest.isEqual(hashEsperado, hashObtenido);
+        } catch (IllegalArgumentException | GeneralSecurityException e) {
+            return false;
+        }
+    }
+
+    private static byte[] derivarHash(String password, byte[] sal, int iteraciones)
+            throws GeneralSecurityException {
+        PBEKeySpec especificacion = new PBEKeySpec(password.toCharArray(), sal, iteraciones, LONGITUD_HASH);
+        try {
+            return SecretKeyFactory.getInstance(ALGORITMO_PASSWORD)
+                    .generateSecret(especificacion).getEncoded();
+        } finally {
+            especificacion.clearPassword();
         }
     }
 
