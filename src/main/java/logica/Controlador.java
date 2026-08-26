@@ -14,6 +14,7 @@ import datatypes.DtOrden;
 import datatypes.DtPrestacion;
 import datatypes.DtSeguido;
 import datatypes.DtUsuario;
+import excepciones.AccesoDenegadoException;
 import excepciones.CredencialesInvalidasException;
 import excepciones.OrdenVaciaException;
 import excepciones.PrestacionEnOrdenException;
@@ -24,6 +25,8 @@ import excepciones.UsuarioRepetidoException;
 import interfaces.IControlador;
 
 public class Controlador implements IControlador {
+
+    private Usuario usuarioAutenticado;
 
     private static final String ALGORITMO_PASSWORD = "PBKDF2WithHmacSHA256";
     private static final String PREFIJO_HASH = "PBKDF2";
@@ -53,6 +56,7 @@ public class Controlador implements IControlador {
         Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
         if (usuario == null || !verificarPassword(password, usuario.getPassword()))
             throw new CredencialesInvalidasException("Email o contraseña incorrectos");
+        usuarioAutenticado = usuario;
         return usuario.getDtUsuario();
     }
 
@@ -80,7 +84,7 @@ public class Controlador implements IControlador {
 
         try {
             String[] partes = passwordGuardada.split("\\$", -1);
-            if (partes.length != 4)
+            if (partes.length != 4 || !PREFIJO_HASH.equals(partes[0]))
                 return false;
 
             int iteraciones = Integer.parseInt(partes[1]);
@@ -105,8 +109,42 @@ public class Controlador implements IControlador {
     }
 
     @Override
-    public void agregarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException {
-        throw new UnsupportedOperationException("Pendiente");
+    public void agregarPrestacion(DtPrestacion prestacion)
+            throws PrestacionRepetidaException, AccesoDenegadoException {
+        verificarMedicoAutenticado();
+        if (prestacion == null || prestacion.id() != null)
+            throw new IllegalArgumentException("La prestación a agregar no es válida");
+        if (prestacion.nombre() == null || prestacion.nombre().isBlank())
+            throw new IllegalArgumentException("El nombre de la prestación es obligatorio");
+        if (!prestacion.nombre().matches("[\\p{L}]+(?:[\\s'-]+[\\p{L}]+)*"))
+            throw new IllegalArgumentException("El nombre solo puede contener letras");
+        if (!Double.isFinite(prestacion.precio()) || prestacion.precio() <= 0 || prestacion.franja() == null)
+            throw new IllegalArgumentException("El precio y la franja de la prestación son obligatorios");
+        if (ManejadorPrestacion.getInstancia().buscarPrestacionPorNombre(prestacion.nombre()) != null)
+            throw new PrestacionRepetidaException(
+                    "Ya existe una prestación con el nombre " + prestacion.nombre());
+
+        Prestacion nueva = switch (prestacion) {
+            case datatypes.DtEstudio estudio -> {
+                if (estudio.duracionMinutos() <= 0)
+                    throw new IllegalArgumentException("La duración debe ser mayor que cero");
+                yield new Estudio(estudio.nombre(), estudio.precio(), estudio.franja(), estudio.duracionMinutos());
+            }
+            case datatypes.DtTerapia terapia -> new Terapia(terapia.nombre(), terapia.precio(), terapia.franja(),
+                    terapia.requiereDerivacion(), validarCantidadSesiones(terapia.cantidadSesiones()));
+        };
+        ManejadorPrestacion.getInstancia().agregarPrestacion(nueva);
+    }
+
+    private int validarCantidadSesiones(int cantidadSesiones) {
+        if (cantidadSesiones <= 0)
+            throw new IllegalArgumentException("La cantidad de sesiones debe ser mayor que cero");
+        return cantidadSesiones;
+    }
+
+    private void verificarMedicoAutenticado() throws AccesoDenegadoException {
+        if (!(usuarioAutenticado instanceof Medico))
+            throw new AccesoDenegadoException("Solo un médico autenticado puede agregar prestaciones");
     }
 
     @Override

@@ -7,6 +7,7 @@ import datatypes.DtOrden;
 import datatypes.DtPrestacion;
 import datatypes.DtSeguido;
 import datatypes.DtUsuario;
+import excepciones.AccesoDenegadoException;
 import excepciones.CredencialesInvalidasException;
 import excepciones.OrdenVaciaException;
 import excepciones.PrestacionEnOrdenException;
@@ -29,7 +30,8 @@ public interface IControlador {
 
     DtUsuario iniciarSesion(String email, String password) throws CredencialesInvalidasException;
 
-    void agregarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException;
+    void agregarPrestacion(DtPrestacion prestacion)
+            throws PrestacionRepetidaException, AccesoDenegadoException;
 
     void modificarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException;
 
