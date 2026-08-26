@@ -25,8 +25,10 @@ public class Principal extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private final JDesktopPane escritorio = new JDesktopPane();
+    private final IControlador icon;
 
     public Principal(IControlador icon, DtUsuario usuario) {
+        this.icon = icon;
         setTitle("Clínica");
         setSize(1100, 680);
         setMinimumSize(getSize());
@@ -81,7 +83,7 @@ public class Principal extends JFrame {
 
     private void menuMedico(JMenuBar barra) {
         JMenu prestaciones = new JMenu("Prestaciones");
-        prestaciones.add(itemPendiente("Agregar prestación"));
+        prestaciones.add(item("Agregar prestación", () -> mostrar(new AgregarPrestacion(icon))));
         prestaciones.add(itemPendiente("Modificar prestación"));
         prestaciones.add(itemPendiente("Eliminar prestación"));
         barra.add(prestaciones);

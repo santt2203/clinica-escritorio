@@ -50,6 +50,9 @@ public final class Tema {
         UIManager.put("Button.default.background", MARCA);
         UIManager.put("Button.default.foreground", Color.WHITE);
         UIManager.put("Button.default.hoverBackground", MARCA_OSCURA);
+        UIManager.put("Button.hoverBackground", MARCA_OSCURA);
+        UIManager.put("Button.hoverForeground", TEXTO);
+        UIManager.put("Button.default.hoverForeground", Color.WHITE);
         UIManager.put("TitlePane.unifiedBackground", false);
         UIManager.put("defaultFont", CUERPO);
     }
