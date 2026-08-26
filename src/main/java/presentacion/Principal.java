@@ -89,13 +89,13 @@ public class Principal extends JFrame {
         barra.add(prestaciones);
 
         JMenu catalogo = new JMenu("Catálogo");
-        catalogo.add(itemPendiente("Ver el catálogo"));
+        catalogo.add(item("Ver el catálogo", () -> mostrar(new Catalogo(icon))));
         barra.add(catalogo);
     }
 
     private void menuPaciente(JMenuBar barra) {
         JMenu catalogo = new JMenu("Catálogo");
-        catalogo.add(itemPendiente("Ver el catálogo"));
+        catalogo.add(item("Ver el catálogo", () -> mostrar(new Catalogo(icon))));
         barra.add(catalogo);
 
         JMenu mio = new JMenu("Mi cuenta");
