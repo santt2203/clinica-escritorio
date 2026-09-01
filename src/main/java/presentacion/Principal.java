@@ -85,7 +85,7 @@ public class Principal extends JFrame {
         JMenu prestaciones = new JMenu("Prestaciones");
         prestaciones.add(item("Agregar prestación", () -> mostrar(new AgregarPrestacion(icon))));
         prestaciones.add(itemPendiente("Modificar prestación"));
-        prestaciones.add(itemPendiente("Eliminar prestación"));
+        prestaciones.add(item("Eliminar prestación", () -> mostrar(new EliminarPrestacion(icon))));
         barra.add(prestaciones);
 
         JMenu catalogo = new JMenu("Catálogo");
