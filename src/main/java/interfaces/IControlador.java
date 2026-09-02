@@ -35,7 +35,8 @@ public interface IControlador {
 
     void modificarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException;
 
-    void eliminarPrestacion(Long idPrestacion) throws PrestacionEnOrdenException;
+    void eliminarPrestacion(Long idPrestacion)
+            throws PrestacionEnOrdenException, AccesoDenegadoException;
 
     List<DtPrestacion> listarCatalogo();
 

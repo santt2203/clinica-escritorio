@@ -144,7 +144,7 @@ public class Controlador implements IControlador {
 
     private void verificarMedicoAutenticado() throws AccesoDenegadoException {
         if (!(usuarioAutenticado instanceof Medico))
-            throw new AccesoDenegadoException("Solo un médico autenticado puede agregar prestaciones");
+            throw new AccesoDenegadoException("Solo un médico autenticado puede administrar prestaciones");
     }
 
     @Override
@@ -153,8 +153,20 @@ public class Controlador implements IControlador {
     }
 
     @Override
-    public void eliminarPrestacion(Long idPrestacion) throws PrestacionEnOrdenException {
-        throw new UnsupportedOperationException("Pendiente");
+    public void eliminarPrestacion(Long idPrestacion)
+            throws PrestacionEnOrdenException, AccesoDenegadoException {
+        verificarMedicoAutenticado();
+        if (idPrestacion == null)
+            throw new IllegalArgumentException("La prestación a eliminar no es válida");
+
+        ManejadorPrestacion manejador = ManejadorPrestacion.getInstancia();
+        Prestacion prestacion = manejador.buscarPrestacion(idPrestacion);
+        if (prestacion == null)
+            throw new IllegalArgumentException("No existe una prestación con ese identificador");
+        if (manejador.fueOrdenada(prestacion))
+            throw new PrestacionEnOrdenException("La prestación " + prestacion.getNombre()
+                    + " ya aparece en una orden médica, no se puede eliminar");
+        manejador.eliminarPrestacion(prestacion);
     }
 
     @Override
