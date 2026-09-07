@@ -33,7 +33,8 @@ public interface IControlador {
     void agregarPrestacion(DtPrestacion prestacion)
             throws PrestacionRepetidaException, AccesoDenegadoException;
 
-    void modificarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException;
+    void modificarPrestacion(DtPrestacion prestacion)
+            throws PrestacionRepetidaException, AccesoDenegadoException;
 
     void eliminarPrestacion(Long idPrestacion)
             throws PrestacionEnOrdenException, AccesoDenegadoException;
@@ -53,4 +54,5 @@ public interface IControlador {
     void confirmarOrden(String email, Map<Long, Integer> cantidadPorPrestacion) throws OrdenVaciaException;
 
     List<DtOrden> listarOrdenes(String email);
+    
 }

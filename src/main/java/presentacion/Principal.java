@@ -84,7 +84,7 @@ public class Principal extends JFrame {
     private void menuMedico(JMenuBar barra) {
         JMenu prestaciones = new JMenu("Prestaciones");
         prestaciones.add(item("Agregar prestación", () -> mostrar(new AgregarPrestacion(icon))));
-        prestaciones.add(itemPendiente("Modificar prestación"));
+        prestaciones.add(item("Modificar prestación", () -> mostrar(new ModificarPrestacion(icon))));
         prestaciones.add(item("Eliminar prestación", () -> mostrar(new EliminarPrestacion(icon))));
         barra.add(prestaciones);
 
