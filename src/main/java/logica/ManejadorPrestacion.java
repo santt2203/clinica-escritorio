@@ -3,6 +3,7 @@ package logica;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import persistencia.Conexion;
 
 public class ManejadorPrestacion {
@@ -27,9 +28,17 @@ public class ManejadorPrestacion {
 
     public void actualizarPrestacion(Prestacion prestacion) {
         EntityManager em = Conexion.getInstancia().getEntityManager();
-        em.getTransaction().begin();
-        em.merge(prestacion);
-        em.getTransaction().commit();
+        EntityTransaction transaccion = em.getTransaction();
+        try {
+            transaccion.begin();
+            em.merge(prestacion);
+            transaccion.commit();
+        } catch (RuntimeException e) {
+            if (transaccion.isActive())
+                transaccion.rollback();
+            em.clear();
+            throw e;
+        }
     }
 
     /** Antes de borrar la prestacion hay que borrar los seguidos que la apuntan. */

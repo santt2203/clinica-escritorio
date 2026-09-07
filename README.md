@@ -13,7 +13,7 @@ La presentación no conoce las entidades: usa `IControlador` y los datatypes. El
 | 1 | Registrar un usuario, que puede ser médico o paciente | Cualquiera | Implementado |
 | 2 | Iniciar sesión. Las contraseñas no se guardan en texto plano | Cualquiera | Implementado |
 | 3 | Agregar una prestación al catálogo | Médico | Implementado |
-| 4 | Modificar una prestación | Médico | Pendiente |
+| 4 | Modificar una prestación | Médico | Implementado |
 | 5 | Eliminar una prestación | Médico | Implementado |
 | 6 | Ver el catálogo de prestaciones | Cualquiera | Implementado |
 

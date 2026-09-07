@@ -33,7 +33,8 @@ public interface IControlador {
     void agregarPrestacion(DtPrestacion prestacion)
             throws PrestacionRepetidaException, AccesoDenegadoException;
 
-    void modificarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException;
+    void modificarPrestacion(DtPrestacion prestacion)
+            throws PrestacionRepetidaException, AccesoDenegadoException;
 
     void eliminarPrestacion(Long idPrestacion)
             throws PrestacionEnOrdenException, AccesoDenegadoException;

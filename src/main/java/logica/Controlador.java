@@ -148,8 +148,54 @@ public class Controlador implements IControlador {
     }
 
     @Override
-    public void modificarPrestacion(DtPrestacion prestacion) throws PrestacionRepetidaException {
-        throw new UnsupportedOperationException("Pendiente");
+    public void modificarPrestacion(DtPrestacion datos)
+            throws PrestacionRepetidaException, AccesoDenegadoException {
+        verificarMedicoAutenticado();
+        if (datos == null || datos.id() == null)
+            throw new IllegalArgumentException("La prestación a modificar no es válida");
+
+        validarDatosPrestacion(datos);
+
+        ManejadorPrestacion manejador = ManejadorPrestacion.getInstancia();
+        Prestacion prestacion = manejador.buscarPrestacion(datos.id());
+        if (prestacion == null)
+            throw new IllegalArgumentException("No existe una prestación con ese identificador");
+
+        Prestacion mismoNombre = manejador.buscarPrestacionPorNombre(datos.nombre());
+        if (mismoNombre != null && !mismoNombre.getId().equals(datos.id()))
+            throw new PrestacionRepetidaException(
+                    "Ya existe una prestación con el nombre " + datos.nombre());
+
+        if (prestacion instanceof Estudio estudio && datos instanceof datatypes.DtEstudio datosEstudio) {
+            estudio.setDuracionMinutos(datosEstudio.duracionMinutos());
+        } else if (prestacion instanceof Terapia terapia && datos instanceof datatypes.DtTerapia datosTerapia) {
+            terapia.setRequiereDerivacion(datosTerapia.requiereDerivacion());
+            terapia.setCantidadSesiones(datosTerapia.cantidadSesiones());
+        } else {
+            throw new IllegalArgumentException("No se puede cambiar el tipo de una prestación");
+        }
+
+        prestacion.setNombre(datos.nombre());
+        prestacion.setPrecio(datos.precio());
+        prestacion.setFranja(datos.franja());
+        manejador.actualizarPrestacion(prestacion);
+    }
+
+    private void validarDatosPrestacion(DtPrestacion prestacion) {
+        if (prestacion.nombre() == null || prestacion.nombre().isBlank())
+            throw new IllegalArgumentException("El nombre de la prestación es obligatorio");
+        if (!prestacion.nombre().matches("[\\p{L}]+(?:[\\s'-]+[\\p{L}]+)*"))
+            throw new IllegalArgumentException("El nombre solo puede contener letras");
+        if (!Double.isFinite(prestacion.precio()) || prestacion.precio() <= 0 || prestacion.franja() == null)
+            throw new IllegalArgumentException("El precio y la franja de la prestación son obligatorios");
+
+        switch (prestacion) {
+            case datatypes.DtEstudio estudio -> {
+                if (estudio.duracionMinutos() <= 0)
+                    throw new IllegalArgumentException("La duración debe ser mayor que cero");
+            }
+            case datatypes.DtTerapia terapia -> validarCantidadSesiones(terapia.cantidadSesiones());
+        }
     }
 
     @Override
