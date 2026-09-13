@@ -259,7 +259,24 @@ public class Controlador implements IControlador {
     @Override
     public void confirmarOrden(String email, Map<Long, Integer> cantidadPorPrestacion)
             throws OrdenVaciaException {
-        throw new UnsupportedOperationException("Pendiente");
+        if (cantidadPorPrestacion == null || cantidadPorPrestacion.isEmpty())
+            throw new OrdenVaciaException("La solicitud está vacía, seleccioná al menos una prestación.");
+
+        Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(usuario instanceof Paciente paciente))
+            throw new IllegalArgumentException("Solo un paciente puede solicitar una orden.");
+
+        OrdenMedica orden = new OrdenMedica(paciente);
+        ManejadorPrestacion prestaciones = ManejadorPrestacion.getInstancia();
+        for (Map.Entry<Long, Integer> entrada : cantidadPorPrestacion.entrySet()) {
+            Prestacion prestacion = prestaciones.buscarPrestacion(entrada.getKey());
+            if (prestacion == null)
+                throw new IllegalArgumentException("No existe una prestación con ese identificador.");
+            if (entrada.getValue() == null || entrada.getValue() <= 0)
+                throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
+            orden.agregarLinea(prestacion, entrada.getValue());
+        }
+        ManejadorOrden.getInstancia().agregarOrden(orden);
     }
 
     @Override
