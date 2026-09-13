@@ -224,12 +224,21 @@ public class Controlador implements IControlador {
 
     @Override
     public List<DtPrestacion> buscarPrestaciones(String texto) {
-        throw new UnsupportedOperationException("Pendiente");
+        if (texto == null || texto.isBlank())
+            return listarCatalogo();
+        return ManejadorPrestacion.getInstancia().buscarPrestaciones(texto.trim()).stream()
+                .map(Prestacion::getDtPrestacion)
+                .toList();
     }
 
     @Override
     public DtPrestacion obtenerPrestacion(Long idPrestacion) {
-        throw new UnsupportedOperationException("Pendiente");
+        if (idPrestacion == null)
+            throw new IllegalArgumentException("La prestación a consultar no es válida");
+        Prestacion prestacion = ManejadorPrestacion.getInstancia().buscarPrestacion(idPrestacion);
+        if (prestacion == null)
+            throw new IllegalArgumentException("No existe una prestación con ese identificador");
+        return prestacion.getDtPrestacion();
     }
 
     @Override
