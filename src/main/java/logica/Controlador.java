@@ -234,17 +234,59 @@ public class Controlador implements IControlador {
 
     @Override
     public void agregarSeguido(String email, Long idPrestacion) throws SeguidoRepetidoException {
-        throw new UnsupportedOperationException("Pendiente");
+        if (email == null || email.isBlank())
+            throw new IllegalArgumentException("El email del paciente es obligatorio");
+        if (idPrestacion == null)
+            throw new IllegalArgumentException("La prestación es obligatoria");
+
+        Usuario paciente = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(paciente instanceof Paciente))
+            throw new IllegalArgumentException("El usuario no es un paciente");
+
+        Prestacion prestacion = ManejadorPrestacion.getInstancia().buscarPrestacion(idPrestacion);
+        if (prestacion == null)
+            throw new IllegalArgumentException("No existe una prestación con ese identificador");
+
+        if (ManejadorSeguido.getInstancia().buscarSeguido((Paciente) paciente, prestacion) != null)
+            throw new SeguidoRepetidoException("La prestación ya está en seguidas");
+
+        ManejadorSeguido.getInstancia().agregarSeguido(new Seguido((Paciente) paciente, prestacion));
     }
 
     @Override
     public void quitarSeguido(String email, Long idPrestacion) throws SeguidoNoExisteException {
-        throw new UnsupportedOperationException("Pendiente");
+        if (email == null || email.isBlank())
+            throw new IllegalArgumentException("El email del paciente es obligatorio");
+        if (idPrestacion == null)
+            throw new IllegalArgumentException("La prestación es obligatoria");
+
+        Usuario paciente = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(paciente instanceof Paciente))
+            throw new IllegalArgumentException("El usuario no es un paciente");
+
+        Prestacion prestacion = ManejadorPrestacion.getInstancia().buscarPrestacion(idPrestacion);
+        if (prestacion == null)
+            throw new IllegalArgumentException("No existe una prestación con ese identificador");
+
+        Seguido seguido = ManejadorSeguido.getInstancia().buscarSeguido((Paciente) paciente, prestacion);
+        if (seguido == null)
+            throw new SeguidoNoExisteException("La prestación no está en seguidas");
+
+        ManejadorSeguido.getInstancia().eliminarSeguido(seguido);
     }
 
     @Override
     public List<DtSeguido> listarSeguidos(String email) {
-        throw new UnsupportedOperationException("Pendiente");
+        if (email == null || email.isBlank())
+            throw new IllegalArgumentException("El email del paciente es obligatorio");
+
+        Usuario paciente = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(paciente instanceof Paciente))
+            throw new IllegalArgumentException("El usuario no es un paciente");
+
+        return ManejadorSeguido.getInstancia().listarSeguidos((Paciente) paciente).stream()
+                .map(Seguido::getDtSeguido)
+                .toList();
     }
 
     @Override

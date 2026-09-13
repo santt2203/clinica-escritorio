@@ -8,7 +8,8 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 /**
- * Singleton: en toda la aplicacion existe una sola Conexion.
+ * 
+ * : en toda la aplicacion existe una sola Conexion.
  * "clinica" es el nombre de la persistence-unit de META-INF/persistence.xml.
  */
 public class Conexion {
