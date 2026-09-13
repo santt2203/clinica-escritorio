@@ -32,7 +32,7 @@ public class MiSolicitud extends VentanaInterna {
     private final Map<Long, Integer> cantidades = new LinkedHashMap<>();
 
     private final DefaultTableModel modelo = modeloTabla(
-            "Prestación", "Cantidad", "Precio unitario", "Subtotal");
+            "ID", "Prestación", "Cantidad", "Precio unitario", "Subtotal");
     private final JTable tabla = new JTable(modelo);
     private final JComboBox<DtPrestacion> campoPrestacion = new JComboBox<>();
     private final JSpinner campoCantidad = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1));
@@ -149,7 +149,13 @@ public class MiSolicitud extends VentanaInterna {
             return;
         }
 
-        double total = totalVigente();
+        double total = 0;
+        try {
+            total = totalVigente();
+        } catch (IllegalArgumentException e) {
+            mostrarMensaje(e.getMessage(), "No se pudo confirmar", true);
+            return;
+        }
 
         int respuesta = JOptionPane.showConfirmDialog(this, resumenSolicitud(total),
                 "Confirmar solicitud", JOptionPane.YES_NO_OPTION);

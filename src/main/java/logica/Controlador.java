@@ -281,6 +281,11 @@ public class Controlador implements IControlador {
 
     @Override
     public List<DtOrden> listarOrdenes(String email) {
-        throw new UnsupportedOperationException("Pendiente");
+        Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(usuario instanceof Paciente paciente))
+            throw new IllegalArgumentException("Solo un paciente puede consultar sus órdenes.");
+        return ManejadorOrden.getInstancia().listarOrdenes(paciente).stream()
+                .map(OrdenMedica::getDtOrden)
+                .toList();
     }
 }

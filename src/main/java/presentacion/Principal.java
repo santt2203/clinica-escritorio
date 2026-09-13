@@ -103,7 +103,7 @@ public class Principal extends JFrame {
         JMenu mio = new JMenu("Mi cuenta");
         mio.add(item("Mi solicitud", () -> mostrar(new MiSolicitud(icon, usuario.email()))));
         mio.add(itemPendiente("Prestaciones seguidas"));
-        mio.add(itemPendiente("Mis órdenes"));
+        mio.add(item("Mis órdenes", () -> mostrar(new MisOrdenes(icon, usuario.email()))));
         barra.add(mio);
     }
 
