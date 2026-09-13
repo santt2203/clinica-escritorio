@@ -57,7 +57,7 @@ public class MisOrdenes extends VentanaInterna {
         etiquetaTotal.setFont(Tema.CUERPO.deriveFont(Font.BOLD));
 
         campoOrden.addActionListener(evento -> cargarOrdenSeleccionada());
-        agregarCampo("Órdenes", campoOrden);
+        agregarCampo("Órdenes (más reciente primero)", campoOrden);
         agregarCentro(new JScrollPane(tabla));
         agregarCampo("Total", etiquetaTotal);
         agregarBoton("Actualizar", this::refrescar);

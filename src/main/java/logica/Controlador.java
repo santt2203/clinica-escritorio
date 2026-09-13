@@ -4,6 +4,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -286,6 +287,7 @@ public class Controlador implements IControlador {
             throw new IllegalArgumentException("Solo un paciente puede consultar sus órdenes.");
         return ManejadorOrden.getInstancia().listarOrdenes(paciente).stream()
                 .map(OrdenMedica::getDtOrden)
+                .sorted(Comparator.comparing(DtOrden::fecha).reversed())
                 .toList();
     }
 }
