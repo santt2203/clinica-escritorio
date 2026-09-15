@@ -1,17 +1,23 @@
 package presentacion;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.RowSorter;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import datatypes.DtEstudio;
 import datatypes.DtPrestacion;
@@ -27,7 +33,6 @@ public class Catalogo extends VentanaInterna {
     private final DefaultTableModel modelo = modeloTabla(
             "ID", "Nombre", "Tipo", "Precio", "Franja", "Detalle");
     private final JTable tabla = new JTable(modelo);
-    private List<DtPrestacion> prestacionesActual = List.of();
     private final JTextField campoBusqueda = new JTextField();
 
     public Catalogo(IControlador icon) {
@@ -42,15 +47,12 @@ public class Catalogo extends VentanaInterna {
         tabla.setRowHeight(28);
         tabla.getTableHeader().setFont(Tema.CUERPO.deriveFont(Font.BOLD));
         tabla.setFillsViewportHeight(true);
+        configurarOrdenamiento();
 
         agregarCampo("Buscar", campoBusqueda);
         campoBusqueda.addActionListener(e -> refrescar());
         agregarCentro(new JScrollPane(tabla));
 
-        agregarBoton("Precio ↑", () -> mostrarPrestaciones(ordenarPorPrecio(prestacionesActual, true)));
-        agregarBoton("Precio ↓", () -> mostrarPrestaciones(ordenarPorPrecio(prestacionesActual, false)));
-        agregarBoton("A-Z", () -> mostrarPrestaciones(ordenarAlfabeticamente(prestacionesActual, true)));
-        agregarBoton("Z-A", () -> mostrarPrestaciones(ordenarAlfabeticamente(prestacionesActual, false)));
         agregarBoton("Buscar", this::refrescar);
         agregarBoton("Ver todas", this::verTodas);
         agregarBoton("Ver detalle", this::verDetalle);
@@ -59,6 +61,36 @@ public class Catalogo extends VentanaInterna {
             agregarBoton("Añadir a seguidas", this::agregarASeguidas);
         }
         agregarBoton("Cerrar", this::cerrar);
+    }
+
+    private void configurarOrdenamiento() {
+        TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modelo);
+        ordenador.setMaxSortKeys(1);
+        ordenador.setSortable(0, false);
+        ordenador.setSortable(2, false);
+        ordenador.setSortable(4, false);
+        ordenador.setSortable(5, false);
+        ordenador.setComparator(1, String.CASE_INSENSITIVE_ORDER);
+        ordenador.setComparator(3,
+                (primero, segundo) -> Double.compare(
+                        ((Number) primero).doubleValue(),
+                        ((Number) segundo).doubleValue()));
+        ordenador.setSortKeys(List.of(new RowSorter.SortKey(1, SortOrder.ASCENDING)));
+        tabla.setRowSorter(ordenador);
+
+        tabla.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Component getTableCellRendererComponent(JTable tabla, Object valor,
+                    boolean seleccionado, boolean enfocado, int fila, int columna) {
+                JLabel etiqueta = (JLabel) super.getTableCellRendererComponent(
+                        tabla, valor, seleccionado, enfocado, fila, columna);
+                etiqueta.setText(String.format("$ %.2f", ((Number) valor).doubleValue()));
+                etiqueta.setHorizontalAlignment(SwingConstants.RIGHT);
+                return etiqueta;
+            }
+        });
     }
 
     private void verTodas() {
@@ -74,7 +106,8 @@ public class Catalogo extends VentanaInterna {
             return;
         }
         try {
-            Long id = (Long) modelo.getValueAt(fila, 0);
+            int filaModelo = tabla.convertRowIndexToModel(fila);
+            Long id = ((Number) modelo.getValueAt(filaModelo, 0)).longValue();
             mostrarDetalle(icon.obtenerPrestacion(id));
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "No se pudo consultar",
@@ -115,7 +148,6 @@ public class Catalogo extends VentanaInterna {
         List<DtPrestacion> prestaciones = texto.isEmpty()
                 ? icon.listarCatalogo()
                 : icon.buscarPrestaciones(texto);
-        prestacionesActual = prestaciones;
         for (DtPrestacion prestacion : prestaciones) {
             String tipo;
             String detalle;
@@ -132,52 +164,10 @@ public class Catalogo extends VentanaInterna {
             }
             modelo.addRow(new Object[] {
                     prestacion.id(), prestacion.nombre(), tipo,
-                    String.format("$ %.2f", prestacion.precio()),
+                    prestacion.precio(),
                     prestacion.franja(), detalle
             });
         }
-    }
-    private void mostrarPrestaciones(List<DtPrestacion> prestaciones) {
-        modelo.setRowCount(0);
-        for (DtPrestacion prestacion : prestaciones) {
-            String tipo;
-            String detalle;
-            switch (prestacion) {
-                case DtEstudio estudio -> {
-                    tipo = "Estudio";
-                    detalle = estudio.duracionMinutos() + " minutos";
-                }
-                case DtTerapia terapia -> {
-                    tipo = "Terapia";
-                    detalle = terapia.cantidadSesiones() + " sesiones"
-                            + (terapia.requiereDerivacion() ? " · requiere derivación" : "");
-                }
-                default -> {
-                    tipo = "Prestación";
-                    detalle = "";
-                }
-            }
-            modelo.addRow(new Object[] {
-                    prestacion.id(), prestacion.nombre(), tipo,
-                    String.format("$ %.2f", prestacion.precio()),
-                    prestacion.franja(), detalle
-            });
-        }
-    }
-
-    private List<DtPrestacion> ordenarPorPrecio(List<DtPrestacion> prestaciones, boolean ascendente) {
-        Comparator<DtPrestacion> comparador = Comparator.comparingDouble(DtPrestacion::precio);
-        return ascendente
-                ? prestaciones.stream().sorted(comparador).toList()
-                : prestaciones.stream().sorted(comparador.reversed()).toList();
-    }
-
-    private List<DtPrestacion> ordenarAlfabeticamente(List<DtPrestacion> prestaciones, boolean ascendente) {
-        Comparator<DtPrestacion> comparador = Comparator.comparing(DtPrestacion::nombre,
-                String.CASE_INSENSITIVE_ORDER);
-        return ascendente
-                ? prestaciones.stream().sorted(comparador).toList()
-                : prestaciones.stream().sorted(comparador.reversed()).toList();
     }
 
     private void agregarASeguidas() {
@@ -187,7 +177,8 @@ public class Catalogo extends VentanaInterna {
             return;
         }
 
-        Long idPrestacion = ((Number) modelo.getValueAt(fila, 0)).longValue();
+        int filaModelo = tabla.convertRowIndexToModel(fila);
+        Long idPrestacion = ((Number) modelo.getValueAt(filaModelo, 0)).longValue();
         try {
             icon.agregarSeguido(email, idPrestacion);
             JOptionPane.showMessageDialog(this, "Prestación agregada a seguidas");
