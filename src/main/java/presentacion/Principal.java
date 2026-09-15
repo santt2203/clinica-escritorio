@@ -72,11 +72,10 @@ public class Principal extends JFrame {
 
         switch (usuario) {
             case DtMedico medico -> menuMedico(barra);
-            case DtPaciente paciente -> menuPaciente(barra, paciente);
+            case DtPaciente paciente -> menuPaciente(barra);
         }
 
         JMenu salir = new JMenu("Sesión");
-        salir.add(item("Mi cuenta", () -> mostrar(new MiCuenta(icon, usuario))));
         salir.add(item("Cerrar sesión", () -> {
             dispose();
             SwingUtilities.invokeLater(() -> new Login().setVisible(true));
@@ -96,14 +95,14 @@ public class Principal extends JFrame {
         barra.add(catalogo);
     }
 
-    private void menuPaciente(JMenuBar barra, DtPaciente paciente) {
+    private void menuPaciente(JMenuBar barra) {
         JMenu catalogo = new JMenu("Catálogo");
-        catalogo.add(item("Ver el catálogo", () -> mostrar(new Catalogo(icon, paciente.email()))));
+        catalogo.add(item("Ver el catálogo", () -> mostrar(new Catalogo(icon))));
         barra.add(catalogo);
 
         JMenu mio = new JMenu("Mi cuenta");
-        mio.add(item("Prestaciones seguidas", () -> mostrar(new Seguidas(icon, paciente.email()))));
         mio.add(item("Mi solicitud", () -> mostrar(new MiSolicitud(icon, usuario.email()))));
+        mio.add(itemPendiente("Prestaciones seguidas"));
         mio.add(item("Mis órdenes", () -> mostrar(new MisOrdenes(icon, usuario.email()))));
         barra.add(mio);
     }
