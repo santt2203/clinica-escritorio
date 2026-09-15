@@ -4,6 +4,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -224,12 +225,21 @@ public class Controlador implements IControlador {
 
     @Override
     public List<DtPrestacion> buscarPrestaciones(String texto) {
-        throw new UnsupportedOperationException("Pendiente");
+        if (texto == null || texto.isBlank())
+            return listarCatalogo();
+        return ManejadorPrestacion.getInstancia().buscarPrestaciones(texto.trim()).stream()
+                .map(Prestacion::getDtPrestacion)
+                .toList();
     }
 
     @Override
     public DtPrestacion obtenerPrestacion(Long idPrestacion) {
-        throw new UnsupportedOperationException("Pendiente");
+        if (idPrestacion == null)
+            throw new IllegalArgumentException("La prestación a consultar no es válida");
+        Prestacion prestacion = ManejadorPrestacion.getInstancia().buscarPrestacion(idPrestacion);
+        if (prestacion == null)
+            throw new IllegalArgumentException("No existe una prestación con ese identificador");
+        return prestacion.getDtPrestacion();
     }
 
     @Override
@@ -292,11 +302,34 @@ public class Controlador implements IControlador {
     @Override
     public void confirmarOrden(String email, Map<Long, Integer> cantidadPorPrestacion)
             throws OrdenVaciaException {
-        throw new UnsupportedOperationException("Pendiente");
+        if (cantidadPorPrestacion == null || cantidadPorPrestacion.isEmpty())
+            throw new OrdenVaciaException("La solicitud está vacía, seleccioná al menos una prestación.");
+
+        Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(usuario instanceof Paciente paciente))
+            throw new IllegalArgumentException("Solo un paciente puede solicitar una orden.");
+
+        OrdenMedica orden = new OrdenMedica(paciente);
+        ManejadorPrestacion prestaciones = ManejadorPrestacion.getInstancia();
+        for (Map.Entry<Long, Integer> entrada : cantidadPorPrestacion.entrySet()) {
+            Prestacion prestacion = prestaciones.buscarPrestacion(entrada.getKey());
+            if (prestacion == null)
+                throw new IllegalArgumentException("No existe una prestación con ese identificador.");
+            if (entrada.getValue() == null || entrada.getValue() <= 0)
+                throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
+            orden.agregarLinea(prestacion, entrada.getValue());
+        }
+        ManejadorOrden.getInstancia().agregarOrden(orden);
     }
 
     @Override
     public List<DtOrden> listarOrdenes(String email) {
-        throw new UnsupportedOperationException("Pendiente");
+        Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (!(usuario instanceof Paciente paciente))
+            throw new IllegalArgumentException("Solo un paciente puede consultar sus órdenes.");
+        return ManejadorOrden.getInstancia().listarOrdenes(paciente).stream()
+                .map(OrdenMedica::getDtOrden)
+                .sorted(Comparator.comparing(DtOrden::fecha).reversed())
+                .toList();
     }
 }

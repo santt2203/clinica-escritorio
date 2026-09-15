@@ -26,9 +26,11 @@ public class Principal extends JFrame {
 
     private final JDesktopPane escritorio = new JDesktopPane();
     private final IControlador icon;
+    private final DtUsuario usuario;
 
     public Principal(IControlador icon, DtUsuario usuario) {
         this.icon = icon;
+        this.usuario = usuario;
         setTitle("Clínica");
         setSize(1100, 680);
         setMinimumSize(getSize());
@@ -101,8 +103,8 @@ public class Principal extends JFrame {
 
         JMenu mio = new JMenu("Mi cuenta");
         mio.add(item("Prestaciones seguidas", () -> mostrar(new Seguidas(icon, paciente.email()))));
-        mio.add(itemPendiente("Mi solicitud"));
-        mio.add(itemPendiente("Mis órdenes"));
+        mio.add(item("Mi solicitud", () -> mostrar(new MiSolicitud(icon, usuario.email()))));
+        mio.add(item("Mis órdenes", () -> mostrar(new MisOrdenes(icon, usuario.email()))));
         barra.add(mio);
     }
 
