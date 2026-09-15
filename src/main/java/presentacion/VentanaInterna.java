@@ -26,7 +26,7 @@ public abstract class VentanaInterna extends JInternalFrame {
     private final JPanel formulario = new JPanel(new GridLayout(0, 2, 8, 8));
 
     /** Franja inferior donde van los botones. */
-    private final JPanel botones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    private final JPanel botones = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     protected VentanaInterna(IControlador icon, String titulo, int ancho, int alto) {
         this.icon = icon;
