@@ -1,15 +1,21 @@
 package presentacion;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.RowSorter;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import datatypes.DtEstudio;
 import datatypes.DtPrestacion;
@@ -26,7 +32,6 @@ public class Seguidas extends VentanaInterna {
     private final DefaultTableModel modelo = modeloTabla(
             "ID", "Nombre", "Tipo", "Precio", "Franja", "Detalle", "Fecha");
     private final JTable tabla = new JTable(modelo);
-    private List<DtSeguido> seguidosActual = List.of();
 
     public Seguidas(IControlador icon, String email) {
         super(icon, "Prestaciones seguidas", 900, 420);
@@ -36,22 +41,49 @@ public class Seguidas extends VentanaInterna {
         tabla.setRowHeight(28);
         tabla.getTableHeader().setFont(Tema.CUERPO.deriveFont(Font.BOLD));
         tabla.setFillsViewportHeight(true);
+        configurarOrdenamiento();
 
         agregarCentro(new JScrollPane(tabla));
 
-        agregarBoton("Precio ↑", () -> mostrarSeguidos(ordenarPorPrecio(seguidosActual, true)));
-        agregarBoton("Precio ↓", () -> mostrarSeguidos(ordenarPorPrecio(seguidosActual, false)));
-        agregarBoton("A-Z", () -> mostrarSeguidos(ordenarAlfabeticamente(seguidosActual, true)));
-        agregarBoton("Z-A", () -> mostrarSeguidos(ordenarAlfabeticamente(seguidosActual, false)));
         agregarBoton("Actualizar", this::refrescar);
         agregarBoton("Eliminar de seguidas", this::eliminarSeleccionada);
         agregarBoton("Cerrar", this::cerrar);
     }
 
+    private void configurarOrdenamiento() {
+        TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modelo);
+        ordenador.setMaxSortKeys(1);
+        ordenador.setSortable(0, false);
+        ordenador.setSortable(2, false);
+        ordenador.setSortable(4, false);
+        ordenador.setSortable(5, false);
+        ordenador.setSortable(6, false);
+        ordenador.setComparator(1, String.CASE_INSENSITIVE_ORDER);
+        ordenador.setComparator(3,
+                (primero, segundo) -> Double.compare(
+                        ((Number) primero).doubleValue(),
+                        ((Number) segundo).doubleValue()));
+        ordenador.setSortKeys(List.of(new RowSorter.SortKey(1, SortOrder.ASCENDING)));
+        tabla.setRowSorter(ordenador);
+
+        tabla.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Component getTableCellRendererComponent(JTable tabla, Object valor,
+                    boolean seleccionado, boolean enfocado, int fila, int columna) {
+                JLabel etiqueta = (JLabel) super.getTableCellRendererComponent(
+                        tabla, valor, seleccionado, enfocado, fila, columna);
+                etiqueta.setText(String.format("$ %.2f", ((Number) valor).doubleValue()));
+                etiqueta.setHorizontalAlignment(SwingConstants.RIGHT);
+                return etiqueta;
+            }
+        });
+    }
+
     @Override
     protected void refrescar() {
-        seguidosActual = icon.listarSeguidos(email);
-        mostrarSeguidos(seguidosActual);
+        mostrarSeguidos(icon.listarSeguidos(email));
     }
 
     private void mostrarSeguidos(List<DtSeguido> seguidos) {
@@ -82,28 +114,12 @@ public class Seguidas extends VentanaInterna {
                     prestacion.id(),
                     prestacion.nombre(),
                     tipo,
-                    String.format("$ %.2f", prestacion.precio()),
+                    prestacion.precio(),
                     prestacion.franja(),
                     detalle,
                     seguido.fecha().format(formatoFecha)
             });
         }
-    }
-
-    private List<DtSeguido> ordenarPorPrecio(List<DtSeguido> seguidos, boolean ascendente) {
-        Comparator<DtSeguido> comparador = Comparator.comparingDouble(seguido -> seguido.prestacion().precio());
-        return ascendente
-                ? seguidos.stream().sorted(comparador).toList()
-                : seguidos.stream().sorted(comparador.reversed()).toList();
-    }
-
-    private List<DtSeguido> ordenarAlfabeticamente(List<DtSeguido> seguidos, boolean ascendente) {
-        Comparator<DtSeguido> comparador = Comparator.comparing(
-                seguido -> seguido.prestacion().nombre(),
-                String.CASE_INSENSITIVE_ORDER);
-        return ascendente
-                ? seguidos.stream().sorted(comparador).toList()
-                : seguidos.stream().sorted(comparador.reversed()).toList();
     }
 
     private void eliminarSeleccionada() {
@@ -113,7 +129,8 @@ public class Seguidas extends VentanaInterna {
             return;
         }
 
-        Long idPrestacion = ((Number) modelo.getValueAt(fila, 0)).longValue();
+        int filaModelo = tabla.convertRowIndexToModel(fila);
+        Long idPrestacion = ((Number) modelo.getValueAt(filaModelo, 0)).longValue();
         try {
             icon.quitarSeguido(email, idPrestacion);
             refrescar();
