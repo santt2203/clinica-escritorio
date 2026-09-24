@@ -21,6 +21,8 @@
             </c:when>
             <c:when test="${sessionScope.rol == 'PACIENTE'}">
                 <a href="${pageContext.request.contextPath}/paciente/seguidas">Seguidas</a>
+                <a href="${pageContext.request.contextPath}/paciente/solicitud">Mi solicitud</a>
+                <a href="${pageContext.request.contextPath}/paciente/ordenes">Mis órdenes</a>
             </c:when>
         </c:choose>
         <c:choose>

@@ -8,7 +8,7 @@
 
 <form class="toolbar" action="${pageContext.request.contextPath}/catalogo" method="get">
     <label>Buscar por nombre
-        <input type="search" name="q" value="<c:out value='${q}'/>" placeholder="Ej.: análisis">
+        <input type="search" name="q" placeholder="Ej.: análisis">
     </label>
     <button type="submit">Buscar</button>
     <label>Ordenar
@@ -28,7 +28,7 @@
                 <a class="button secondary" href="${pageContext.request.contextPath}/prestacion?id=${p.id}">Ver detalle</a>
                 <c:if test="${sessionScope.rol == 'MEDICO'}">
                     <a class="button secondary" href="${pageContext.request.contextPath}/medico/prestaciones/editar?id=${p.id}">Editar</a>
-                    <form action="${pageContext.request.contextPath}/medico/prestaciones/eliminar" method="post" class="inline">
+                    <form action="${pageContext.request.contextPath}/medico/prestaciones/eliminar" method="post" class="inline confirm-delete">
                         <input type="hidden" name="id" value="${p.id}"><button class="danger" type="submit">Eliminar</button>
                     </form>
                 </c:if>
@@ -36,6 +36,11 @@
                     <form action="${pageContext.request.contextPath}/paciente/seguidas" method="post" class="inline ajax-follow">
                         <input type="hidden" name="id" value="${p.id}"><input type="hidden" name="accion" value="agregar">
                         <button type="submit">Seguir</button>
+                    </form>
+                    <form action="${pageContext.request.contextPath}/paciente/solicitud" method="post" class="inline">
+                        <input type="hidden" name="id" value="${p.id}"><input type="hidden" name="accion" value="agregar">
+                        <input class="quantity" type="number" name="cantidad" value="1" min="1" aria-label="Cantidad">
+                        <button type="submit">Solicitar</button>
                     </form>
                 </c:if>
             </div>
