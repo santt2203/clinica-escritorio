@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Clínica PAP</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/clinica.css">
+    <script defer src="${pageContext.request.contextPath}/assets/clinica.js"></script>
 </head>
 <body>
 <header class="site-header">

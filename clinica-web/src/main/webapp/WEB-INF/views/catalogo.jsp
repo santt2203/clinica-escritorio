@@ -11,11 +11,16 @@
         <input type="search" name="q" value="<c:out value='${q}'/>" placeholder="Ej.: análisis">
     </label>
     <button type="submit">Buscar</button>
+    <label>Ordenar
+        <select id="orden-catalogo" name="orden">
+            <option value="nombre">Nombre</option><option value="precio">Precio</option>
+        </select>
+    </label>
 </form>
 
 <div id="catalogo" class="card-grid">
     <c:forEach items="${prestaciones}" var="p">
-        <article class="card prestacion">
+        <article class="card prestacion" data-name="${p.nombre}" data-price="${p.precio}">
             <div class="card-title"><span class="badge"><c:out value="${p.tipo}"/></span><h2><c:out value="${p.nombre}"/></h2></div>
             <dl><dt>Precio</dt><dd><fmt:formatNumber value="${p.precio}" type="currency" currencySymbol="$ "/></dd>
                 <dt>Franja</dt><dd><c:out value="${p.franja}"/></dd></dl>
