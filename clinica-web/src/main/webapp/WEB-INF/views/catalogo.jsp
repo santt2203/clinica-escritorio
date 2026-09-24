@@ -6,6 +6,13 @@
     </c:if>
 </section>
 
+<form class="toolbar" action="${pageContext.request.contextPath}/catalogo" method="get">
+    <label>Buscar por nombre
+        <input type="search" name="q" value="<c:out value='${q}'/>" placeholder="Ej.: análisis">
+    </label>
+    <button type="submit">Buscar</button>
+</form>
+
 <div id="catalogo" class="card-grid">
     <c:forEach items="${prestaciones}" var="p">
         <article class="card prestacion">

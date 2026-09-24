@@ -15,8 +15,10 @@ public class CatalogoServlet extends BaseServlet {
         Object flashError = req.getSession().getAttribute("flashError");
         if (flash != null) { req.setAttribute("mensaje", flash); req.getSession().removeAttribute("flash"); }
         if (flashError != null) { req.setAttribute("error", flashError); req.getSession().removeAttribute("flashError"); }
+        String texto = req.getParameter("q");
         try {
-            req.setAttribute("prestaciones", servicio().catalogo(null));
+            req.setAttribute("prestaciones", servicio().catalogo(texto));
+            req.setAttribute("q", texto);
         } catch (ServicioException e) {
             req.setAttribute("error", mensaje(e));
         }
