@@ -32,9 +32,16 @@
                         <input type="hidden" name="id" value="${p.id}"><button class="danger" type="submit">Eliminar</button>
                     </form>
                 </c:if>
+                <c:if test="${sessionScope.rol == 'PACIENTE'}">
+                    <form action="${pageContext.request.contextPath}/paciente/seguidas" method="post" class="inline ajax-follow">
+                        <input type="hidden" name="id" value="${p.id}"><input type="hidden" name="accion" value="agregar">
+                        <button type="submit">Seguir</button>
+                    </form>
+                </c:if>
             </div>
         </article>
     </c:forEach>
 </div>
 <c:if test="${empty prestaciones and empty error}"><p class="empty">No se encontraron prestaciones.</p></c:if>
+<div id="ajax-message" aria-live="polite"></div>
 <%@ include file="fragments/footer.jspf" %>

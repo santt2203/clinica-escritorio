@@ -19,6 +19,9 @@
             <c:when test="${sessionScope.rol == 'MEDICO'}">
                 <a href="${pageContext.request.contextPath}/medico/prestaciones/nueva">Nueva prestación</a>
             </c:when>
+            <c:when test="${sessionScope.rol == 'PACIENTE'}">
+                <a href="${pageContext.request.contextPath}/paciente/seguidas">Seguidas</a>
+            </c:when>
         </c:choose>
         <c:choose>
             <c:when test="${empty sessionScope.token}">
