@@ -29,6 +29,14 @@ public class Controlador implements IControlador {
 
     private Usuario usuarioAutenticado;
 
+    /** Usado por la fachada SOAP después de validar su token de sesión. */
+    public void establecerUsuarioAutenticado(String email) {
+        Usuario usuario = ManejadorUsuario.getInstancia().buscarUsuario(email);
+        if (usuario == null)
+            throw new IllegalArgumentException("La sesión pertenece a un usuario inexistente");
+        usuarioAutenticado = usuario;
+    }
+
     private static final String ALGORITMO_PASSWORD = "PBKDF2WithHmacSHA256";
     private static final String PREFIJO_HASH = "PBKDF2";
     private static final int ITERACIONES = 210_000;

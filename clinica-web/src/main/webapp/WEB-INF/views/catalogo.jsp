@@ -1,0 +1,52 @@
+<%@ include file="fragments/header.jspf" %>
+<section class="page-heading">
+    <div><p class="eyebrow">Prestaciones</p><h1>Catálogo</h1></div>
+    <c:if test="${sessionScope.rol == 'MEDICO'}">
+        <a class="button" href="${pageContext.request.contextPath}/medico/prestaciones/nueva">Agregar prestación</a>
+    </c:if>
+</section>
+
+<form class="toolbar" action="${pageContext.request.contextPath}/catalogo" method="get">
+    <label>Buscar por nombre
+        <input type="search" name="q" placeholder="Ej.: análisis">
+    </label>
+    <button type="submit">Buscar</button>
+    <label>Ordenar
+        <select id="orden-catalogo" name="orden">
+            <option value="nombre">Nombre</option><option value="precio">Precio</option>
+        </select>
+    </label>
+</form>
+
+<div id="catalogo" class="card-grid">
+    <c:forEach items="${prestaciones}" var="p">
+        <article class="card prestacion" data-name="${p.nombre}" data-price="${p.precio}">
+            <div class="card-title"><span class="badge"><c:out value="${p.tipo}"/></span><h2><c:out value="${p.nombre}"/></h2></div>
+            <dl><dt>Precio</dt><dd><fmt:formatNumber value="${p.precio}" type="currency" currencySymbol="$ "/></dd>
+                <dt>Franja</dt><dd><c:out value="${p.franja}"/></dd></dl>
+            <div class="actions">
+                <a class="button secondary" href="${pageContext.request.contextPath}/prestacion?id=${p.id}">Ver detalle</a>
+                <c:if test="${sessionScope.rol == 'MEDICO'}">
+                    <a class="button secondary" href="${pageContext.request.contextPath}/medico/prestaciones/editar?id=${p.id}">Editar</a>
+                    <form action="${pageContext.request.contextPath}/medico/prestaciones/eliminar" method="post" class="inline confirm-delete">
+                        <input type="hidden" name="id" value="${p.id}"><button class="danger" type="submit">Eliminar</button>
+                    </form>
+                </c:if>
+                <c:if test="${sessionScope.rol == 'PACIENTE'}">
+                    <form action="${pageContext.request.contextPath}/paciente/seguidas" method="post" class="inline ajax-follow">
+                        <input type="hidden" name="id" value="${p.id}"><input type="hidden" name="accion" value="agregar">
+                        <button type="submit">Seguir</button>
+                    </form>
+                    <form action="${pageContext.request.contextPath}/paciente/solicitud" method="post" class="inline">
+                        <input type="hidden" name="id" value="${p.id}"><input type="hidden" name="accion" value="agregar">
+                        <input class="quantity" type="number" name="cantidad" value="1" min="1" aria-label="Cantidad">
+                        <button type="submit">Solicitar</button>
+                    </form>
+                </c:if>
+            </div>
+        </article>
+    </c:forEach>
+</div>
+<c:if test="${empty prestaciones and empty error}"><p class="empty">No se encontraron prestaciones.</p></c:if>
+<div id="ajax-message" aria-live="polite"></div>
+<%@ include file="fragments/footer.jspf" %>

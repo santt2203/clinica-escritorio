@@ -22,4 +22,11 @@ public class Fabrica {
     public IControlador getIControlador() {
         return new Controlador();
     }
+
+    /** Crea un controlador para una identidad ya autenticada por el servicio. */
+    public IControlador getIControladorParaSesion(String email) {
+        Controlador controlador = new Controlador();
+        controlador.establecerUsuarioAutenticado(email);
+        return controlador;
+    }
 }
