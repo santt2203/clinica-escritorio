@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>com.clinicapap</groupId><artifactId>clinica</artifactId><version>2.0.0</version></parent>
+    <artifactId>clinica-web</artifactId>
+    <packaging>war</packaging>
+    <name>Clínica - cliente web</name>
+
+    <!-- Deliberadamente no depende de clinica-core ni de PostgreSQL. -->
+    <dependencies>
+        <dependency><groupId>com.sun.xml.ws</groupId><artifactId>jaxws-rt</artifactId></dependency>
+        <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>provided</scope></dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId><artifactId>jakarta.servlet.jsp.jstl-api</artifactId><version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId><artifactId>jakarta.servlet.jsp.jstl</artifactId><version>3.0.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>clinica-web</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.sun.xml.ws</groupId><artifactId>jaxws-maven-plugin</artifactId><version>3.0.2</version>
+                <dependencies>
+                    <dependency><groupId>com.sun.xml.ws</groupId><artifactId>jaxws-tools</artifactId><version>${jaxws.version}</version></dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>generar-cliente-desde-wsdl</id><phase>generate-sources</phase><goals><goal>wsimport</goal></goals>
+                        <configuration>
+                            <wsdlDirectory>${project.parent.basedir}/clinica-servicio/target/generated-resources/wsdl</wsdlDirectory>
+                            <wsdlFiles><wsdlFile>ClinicaService.wsdl</wsdlFile></wsdlFiles>
+                            <packageName>cliente.soap</packageName>
+                            <keep>true</keep>
+                            <xnocompile>true</xnocompile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId><artifactId>maven-war-plugin</artifactId>
+                <configuration><failOnMissingWebXml>false</failOnMissingWebXml></configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

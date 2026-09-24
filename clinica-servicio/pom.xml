@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>com.clinicapap</groupId><artifactId>clinica</artifactId><version>2.0.0</version></parent>
+    <artifactId>clinica-servicio</artifactId>
+    <packaging>war</packaging>
+    <name>Clínica - servicio SOAP</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.clinicapap</groupId><artifactId>clinica-core</artifactId><version>${project.version}</version>
+        </dependency>
+        <dependency><groupId>com.sun.xml.ws</groupId><artifactId>jaxws-rt</artifactId></dependency>
+        <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>provided</scope></dependency>
+    </dependencies>
+
+    <build>
+        <finalName>clinica-servicio</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.sun.xml.ws</groupId><artifactId>jaxws-maven-plugin</artifactId><version>3.0.2</version>
+                <dependencies>
+                    <dependency><groupId>com.sun.xml.ws</groupId><artifactId>jaxws-tools</artifactId><version>${jaxws.version}</version></dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>generar-wsdl</id><phase>process-classes</phase><goals><goal>wsgen</goal></goals>
+                        <configuration>
+                            <sei>servicio.ClinicaEndpoint</sei>
+                            <genWsdl>true</genWsdl>
+                            <keep>true</keep>
+                            <resourceDestDir>${project.build.directory}/generated-resources/wsdl</resourceDestDir>
+                            <sourceDestDir>${project.build.directory}/generated-sources/wsgen</sourceDestDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId><artifactId>maven-war-plugin</artifactId>
+                <configuration><failOnMissingWebXml>false</failOnMissingWebXml></configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
