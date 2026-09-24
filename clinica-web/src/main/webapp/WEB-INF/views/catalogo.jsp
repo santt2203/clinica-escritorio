@@ -20,6 +20,7 @@
             <dl><dt>Precio</dt><dd><fmt:formatNumber value="${p.precio}" type="currency" currencySymbol="$ "/></dd>
                 <dt>Franja</dt><dd><c:out value="${p.franja}"/></dd></dl>
             <div class="actions">
+                <a class="button secondary" href="${pageContext.request.contextPath}/prestacion?id=${p.id}">Ver detalle</a>
                 <c:if test="${sessionScope.rol == 'MEDICO'}">
                     <a class="button secondary" href="${pageContext.request.contextPath}/medico/prestaciones/editar?id=${p.id}">Editar</a>
                     <form action="${pageContext.request.contextPath}/medico/prestaciones/eliminar" method="post" class="inline">
