@@ -58,7 +58,7 @@ public class ManejadorPrestacion {
 
     public Prestacion buscarPrestacionPorNombre(String nombre) {
         return Conexion.getInstancia().getEntityManager()
-                .createQuery("select p from Prestacion p where p.nombre = :nombre", Prestacion.class)
+                .createQuery("select p from Prestacion p where lower(p.nombre) = lower(:nombre)", Prestacion.class)
                 .setParameter("nombre", nombre)
                 .getResultStream()
                 .findFirst()
