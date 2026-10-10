@@ -1,5 +1,7 @@
 package persistencia;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,8 +24,18 @@ public class Conexion {
     private Conexion() {
         Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
 
-        emf = Persistence.createEntityManagerFactory("clinica");
+        Map<String, String> propiedades = new HashMap<>();
+        agregarSiExiste(propiedades, "jakarta.persistence.jdbc.url", "CLINICA_DB_URL");
+        agregarSiExiste(propiedades, "jakarta.persistence.jdbc.user", "CLINICA_DB_USER");
+        agregarSiExiste(propiedades, "jakarta.persistence.jdbc.password", "CLINICA_DB_PASSWORD");
+        emf = Persistence.createEntityManagerFactory("clinica", propiedades);
         em = emf.createEntityManager();
+    }
+
+    private static void agregarSiExiste(Map<String, String> propiedades, String propiedad, String variable) {
+        String valor = System.getenv(variable);
+        if (valor != null && !valor.isBlank())
+            propiedades.put(propiedad, valor);
     }
 
     public static Conexion getInstancia() {

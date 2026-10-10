@@ -1,5 +1,6 @@
 # Maven
 target/
+**/target/
 
 # Eclipse
 .classpath
@@ -16,3 +17,6 @@ target/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Ejecución local
+*.log
